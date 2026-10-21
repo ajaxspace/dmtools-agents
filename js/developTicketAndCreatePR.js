@@ -1501,16 +1501,25 @@ function ensureResponseForPrBody(ctx) {
             resetInterruptedDevelopment(ctx, interruptedPartialWorkComment(ctx.ticketKey, ctx.branchName, ctx.providerOutage));
         }
     }
-    // Fork: post-processor — mirror integration concerns into the PR body so
-    // reviewers see them without visiting the ticket.
+    // Fork: post-processor — mirror integration concerns into the PR body.
+    // The PR body is assembled from the outputs/response.md FILE (see
+    // bodyFileCandidates in createPullRequest), so the concerns are appended
+    // to that file rather than to the in-memory string returned here.
     try {
-        var concernsDetailed = outputFiles.readOutputFileDetailed('concerns.md');
-        if (concernsDetailed && concernsDetailed.content && concernsDetailed.content.trim()) {
-            responseContent += '\n\n## ⚠️ Concerns — may not work until resolved\n\n' + concernsDetailed.content.trim() + '\n';
-            console.log('Appended outputs/concerns.md to the PR body.');
+        var concernsForBody = outputFiles.readOutputFileDetailed('concerns.md');
+        if (concernsForBody && concernsForBody.content && concernsForBody.content.trim()) {
+            var baseResponse = readResponseMd(ctx.ticketKey) || '';
+            if (baseResponse.indexOf('Concerns — may not work until resolved') === -1) {
+                file_write({
+                    path: 'outputs/response.md',
+                    content: baseResponse + '\n\n## ⚠️ Concerns — may not work until resolved\n\n' + concernsForBody.content.trim() + '\n'
+                });
+                console.log('Appended outputs/concerns.md to outputs/response.md (PR body source).');
+                responseContent = baseResponse + '\n\n## ⚠️ Concerns — may not work until resolved\n\n' + concernsForBody.content.trim() + '\n';
+            }
         }
     } catch (e) {
-        console.warn('Could not read outputs/concerns.md for the PR body:', e);
+        console.warn('Could not append concerns to the PR body source:', e);
     }
 
     // gh-1137: the PR body (the leg summary) must state which Dart SDK the leg
