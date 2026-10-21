@@ -1666,6 +1666,25 @@ function action(params) {
             return initialOutcome.result;
         }
 
+        // Fork: inputs pre-flight outcome (no-assumptions rule). The agent
+        // scanned the ticket and flagged missing required inputs by writing
+        // outputs/needs-input.md (the question comment is posted by the agent
+        // itself). Ask-mode: label the ticket and end the leg GREEN without
+        // creating a PR; a human reply re-arms the leg via the comment trigger.
+        if (outputFiles.hasOutputFile('needs-input.md')) {
+            console.log('outputs/needs-input.md present — agent flagged missing ticket inputs. Skipping gates and PR creation.');
+            try {
+                getTracker().addLabel(ctx.ticketKey, LABELS.AI_QUESTIONS_ASKED);
+            } catch (e) {
+                console.warn('Could not add ' + LABELS.AI_QUESTIONS_ASKED + ' label:', e);
+            }
+            return {
+                success: true,
+                message: 'Ticket ' + ctx.ticketKey + ' needs input from the reporter — question posted, no PR created',
+                needsInput: true
+            };
+        }
+
         var gateResult = feedbackLoop.runQualityGates({
             ticketKey: ctx.ticketKey,
             customParams: ctx.customParams,
