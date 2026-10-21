@@ -234,6 +234,31 @@ function checkoutBranch(ticketKey, config, ticket, customParams) {
     }
 
     var localBranches = '';
+    // Fork: resume guard — the teammate job regenerates input/<ticketKey>/
+    // every run; when the target branch already carries those files (an
+    // ask-mode leg's session timer commits them), the fresh copies sit
+    // untracked and git refuses the checkout ("would be overwritten by
+    // checkout"). input/ is a per-run artifact drop — remove the untracked
+    // collisions (tracked files are untouched) so resume legs can align
+    // with the existing branch.
+    try {
+        var stOut = cleanCommandOutput(runCmd({ command: 'git status --porcelain -- input/' })) || '';
+        var stLines = stOut.split('\n');
+        for (var si = 0; si < stLines.length; si++) {
+            var stLine = stLines[si];
+            if (stLine.substring(0, 2) === '??') {
+                var stalePath = stLine.substring(3).trim();
+                if (!stalePath) continue;
+                console.log('Removing untracked per-run artifact before checkout:', stalePath);
+                try { runCmd({ command: 'bash -c "rm -rf ' + stalePath + '"' }); } catch (e) {
+                    console.warn('Could not remove stale artifact ' + stalePath + ':', e);
+                }
+            }
+        }
+    } catch (e) {
+        console.warn('Input-artifact cleanup before checkout failed:', e);
+    }
+
     try {
         var rawLocal = runCmd({ command: 'git branch --list "' + branchName + '"' }) || '';
         localBranches = cleanCommandOutput(rawLocal);
