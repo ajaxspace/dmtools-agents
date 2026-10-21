@@ -16,7 +16,10 @@ flowchart TD
     RUN --> PASS{Tests pass?}
     PASS -->|No| FIX["Fix failures and re-run tests"]
     FIX --> RUN
-    PASS -->|Yes| GITSTATUS["Run git status and review every new/modified file"]
+    PASS -->|Yes| POSTCHECK{"Integration readiness check:<br/>does the feature depend on external setup<br/>the repo does not contain?"}
+    POSTCHECK -->|Gaps found| CONCERNS["Write outputs/concerns.md:<br/>what is missing + what is needed to make it work"]
+    CONCERNS --> GITSTATUS["Run git status and review every new/modified file"]
+    POSTCHECK -->|Self-sufficient| GITSTATUS["Run git status and review every new/modified file"]
     GITSTATUS --> SECRETS{Sensitive or untracked non-code files present?}
     SECRETS -->|Yes| IGNORE["Add appropriate patterns to .gitignore"]
     SECRETS -->|No| GUARD["⚠️ COMPLETION GUARD — prove work landed BEFORE writing the summary:<br/>git fetch origin main &amp;&amp; git log origin/main..HEAD --oneline<br/>EMPTY result = work did NOT land — re-do or resume the work,<br/>NEVER report done from session memory or main's tip"]
@@ -55,3 +58,18 @@ If there are NO highlights — continue with the normal flow.
 - NEVER generate, synthesize, or substitute a placeholder for a missing attachment (no "a logo will do", no generated stand-ins). An unattended run is NOT a license to improvise.
 - NEVER assume a value for missing data "to keep the leg moving".
 - If missing information surfaces DURING implementation, stop the same way (comment + `outputs/needs-input.md`, no further code changes) instead of guessing.
+
+## ⚠️ COMPLETION POST-CHECK — integration readiness (before finishing)
+
+After implementation is done and all tests pass, run a quick integration-readiness scan of YOUR OWN change. Question it answers: **will this feature actually work in the target environment, or does it depend on external setup this repo does not contain?**
+
+Flag (as concerns) anything feature-blocking that is NOT code:
+- External services the code now depends on but that are not provisioned (Firebase, Apple/Google developer config, API backends, databases).
+- Missing configuration artifacts: `google-services.json`, `GoogleService-Info.plist`, client IDs / API keys / secrets, environment variables, `.entitlements`, URL scheme registrations, Gradle/Info.plist/manifest changes.
+- Referenced-but-absent external contracts: an endpoint that the provided API spec (e.g. swagger) does not define, a webhook URL that was never registered.
+
+**Do NOT flag code-quality, style, architecture, or test-coverage issues — the review agent owns those. Do not duplicate its work.**
+
+If there ARE concerns: write `outputs/concerns.md` — for each concern: (a) what the PR does, (b) what is missing, (c) concretely what is needed to make it work (exact file names, IDs, console/account steps). Short and factual; the pipeline appends it to the completion comment and the PR body and labels the ticket `ai_concerns`.
+
+If there are NO concerns: write nothing — no file, no label.
