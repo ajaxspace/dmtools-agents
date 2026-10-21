@@ -13,7 +13,7 @@
 #   DMTOOLS_VERSION=v0.1.0 dmtools-dart.sh
 #   DMTOOLS_INSTALL_DIR=... dmtools-dart.sh        # default: ~/.dmtools-dart
 #
-# Install source: https://github.com/epam/dmtools-dart/releases
+# Install source: https://github.com/ajaxspace/dmtools-dart/releases
 #   (the upstream install.sh detects OS/arch, downloads the AOT binary +
 #   the QuickJS shared library, and installs both under <dir>/bin)
 set -eu
@@ -45,11 +45,11 @@ echo "📥 Installing dmtools-dart (${DMTOOLS_VERSION})..."
 # pins a concrete release when a version argument is passed.
 if [ "${DMTOOLS_VERSION}" != "latest" ]; then
   curl -fsSL \
-    "https://github.com/epam/dmtools-dart/releases/latest/download/install.sh" \
+    "https://github.com/ajaxspace/dmtools-dart/releases/latest/download/install.sh" \
     | sh -s -- "${DMTOOLS_VERSION}"
 else
   curl -fsSL \
-    "https://github.com/epam/dmtools-dart/releases/latest/download/install.sh" \
+    "https://github.com/ajaxspace/dmtools-dart/releases/latest/download/install.sh" \
     | sh
 fi
 
@@ -59,6 +59,6 @@ if [ -x "${DMTOOLS_BIN}/dmtools" ]; then
   echo "✅ dmtools-dart installed: ${DMTOOLS_BIN}/dmtools ($("${DMTOOLS_BIN}/dmtools" --version 2>/dev/null || echo 'version n/a'))"
 else
   echo "⚠️  dmtools-dart could not be installed automatically." >&2
-  echo "    Install manually: curl -fsSL \"https://github.com/epam/dmtools-dart/releases/latest/download/install.sh\" | sh" >&2
+  echo "    Install manually: curl -fsSL \"https://github.com/ajaxspace/dmtools-dart/releases/latest/download/install.sh\" | sh" >&2
   exit 1
 fi

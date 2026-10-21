@@ -18,7 +18,7 @@ source "${SCRIPT_DIR}/_common.sh"
 FA_BIN_DIR="${FA_INSTALL_DIR:-${HOME}/.local/bin}"
 FA_LIB_DIR="$(dirname "${FA_BIN_DIR}")/lib"
 FA_VERSION="${1:-${FA_VERSION:-latest}}"
-FA_REPO="IstiN/flutter_agent_harness"
+FA_REPO="ajaxspace/flutter_agent_harness"
 
 # ── Configure the deterministic session for AI Teammate runs ─────────────────
 _configure_session() {

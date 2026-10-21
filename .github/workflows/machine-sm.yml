@@ -40,7 +40,7 @@ jobs:
     # Pinned to the immutable SHA of IstiN/dmtools-agentic-workflows main
     # (the frozen machine-loop home; bump the SHA only together with the
     # matching loop change).
-    uses: IstiN/dmtools-agentic-workflows/.github/workflows/factory-sm.yml@main
+    uses: ajaxspace/dmtools-agentic-workflows/.github/workflows/factory-sm.yml@main
     with:
       # No .dmtools/config.js in this repo — the machine logins ride the
       # deployment-level input (#687, gh-728), exactly like the factory's
