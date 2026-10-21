@@ -1392,6 +1392,28 @@ function resetInterruptedDevelopment(ctx, commentBody) {
 }
 
 function recoverNoChangesOutcome(params, ctx) {
+    // Fork: ask-mode (no-assumptions rule) — the agent flagged missing
+    // ticket inputs and stopped WITHOUT writing response.md (the question
+    // comment is already posted; outputs/needs-input.md marks the leg).
+    // This check MUST precede the interrupted classification below: a
+    // response.md-less ask leg is exactly where the ticket should be —
+    // waiting on the reporter — never an interrupted reset, and the
+    // wrapper's hand-issue-to-reviewer skips ask-mode via the same label.
+    if (outputFiles.hasOutputFile('needs-input.md')) {
+        console.log('outputs/needs-input.md present — ask-mode leg: agent asked for missing inputs. No PR, no reset.');
+        try {
+            getTracker().addLabel(ctx.ticketKey, LABELS.AI_QUESTIONS_ASKED);
+        } catch (e) {
+            console.warn('Could not add ' + LABELS.AI_QUESTIONS_ASKED + ' label:', e);
+        }
+        return {
+            result: {
+                success: true,
+                message: 'Ticket ' + ctx.ticketKey + ' needs input from the reporter — question posted, no PR created',
+                needsInput: true
+            }
+        };
+    }
     var agentResponse = noChangesResponse(ctx);
     if (agentResponse) {
         var guard = landingGuardResume(params, ctx, agentResponse);
