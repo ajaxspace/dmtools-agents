@@ -1,5 +1,18 @@
 Read ticket details from input folder which contains complete ticket context automatically prepared by Teammate job
 
+**IMPORTANT — INPUT COMPLETENESS PRE-FLIGHT (run this BEFORE any implementation; keep it surface-level):**
+Quickly scan the ticket context (title, description, and comments authored by humans) for highlights that would force you to ASSUME. Do not deep-analyze — this is a fast go/no-go check. Highlights include:
+- The ticket references an attachment, image, screenshot, logo, design file, or external resource that is NOT present in the ticket context.
+- Referenced credentials, environment details, or access are missing.
+- Essential statements contradict each other.
+
+If there ARE highlights — do NOT implement. Instead:
+1. Post ONE comment on the ticket asking for exactly the missing items. Be specific; propose nothing and assume nothing.
+2. Write `outputs/needs-input.md` listing the missing items (same content as the comment).
+3. Make NO code changes and stop. The pipeline will label the ticket `ai_questions_asked` and end the leg without creating a PR.
+
+If there are NO highlights — proceed with implementation normally. If missing information surfaces DURING implementation, stop the same way (post the comment + write `outputs/needs-input.md`, no code changes) instead of guessing.
+
 **IMPORTANT** If a file named `instruction.md` exists in the repository root, read it before implementing. Use it as the authoritative reference for the project's tech stack, deployment constraints, and approved frameworks — your implementation must align with what is defined there.
 
 Analyze the ticket requirements, acceptance criteria, and business rules carefully
