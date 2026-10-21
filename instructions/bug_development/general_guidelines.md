@@ -45,6 +45,15 @@ Right after reading the input files, run a QUICK (surface-level) go/no-go scan o
 - Essential statements contradict each other.
 
 If there ARE highlights — do NOT implement. Instead:
+
+> **TEMPORARY COLLISION WORKAROUND — remove later.** The machine currently
+> runs under the same GitHub identity as the human reporter
+> (SOURCE_GITHUB_TOKEN = the repo owner; `ai-teammate` is not yet a
+> separate collaborator account), so author login cannot tell the agent's
+> own question from a human reply. Once the machine runs under a dedicated
+> identity, drop this marker requirement AND the marker check in the
+> dispatch gate (dmtools-agentic-workflows scripts/teammate-dispatch-gate.sh).
+
 1. Post ONE comment on the ticket asking for exactly the missing items. Be specific; propose nothing, assume nothing. The comment MUST end with this exact machine marker line (it tells the pipeline this comment is the agent's own question, not a human reply):
    `<!-- needs-input: ai_questions_asked -->`
 2. Write `outputs/needs-input.md` listing the missing items (same content as the comment).
