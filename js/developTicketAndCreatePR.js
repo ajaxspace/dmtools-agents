@@ -555,6 +555,32 @@ function postPRCommentToJira(ticketKey, prUrl, branchName) {
 
         comment += '\nAI Teammate has completed the implementation and created a pull request for review.';
 
+        // Fork: post-processor — surface integration-readiness concerns the
+        // agent flagged after implementing (outputs/concerns.md). Informational
+        // only: the PR proceeds through review normally; the label just makes
+        // concerned PRs visible. Scope is NON-code blockers (missing external
+        // services, config files/IDs/secrets, platform setup) — code quality
+        // stays the review agent's job.
+        var concerns = null;
+        try {
+            var concernsDetailed = outputFiles.readOutputFileDetailed('concerns.md');
+            if (concernsDetailed && concernsDetailed.content && concernsDetailed.content.trim()) {
+                concerns = concernsDetailed.content.trim();
+            }
+        } catch (e) {
+            console.warn('Could not read outputs/concerns.md:', e);
+        }
+        if (concerns) {
+            comment += '\n\n' + m.h(3, '⚠️ Concerns — may not work until resolved') + '\n\n';
+            comment += concerns + '\n';
+            try {
+                getTracker().addLabel(ticketKey, LABELS.AI_CONCERNS);
+                console.log('⚠️ Added ' + LABELS.AI_CONCERNS + ' label to', ticketKey);
+            } catch (e) {
+                console.warn('Could not add ' + LABELS.AI_CONCERNS + ' label:', e);
+            }
+        }
+
         getTracker().postComment(ticketKey, comment);
 
         console.log('✅ Posted PR comment to', ticketKey);
@@ -1475,6 +1501,18 @@ function ensureResponseForPrBody(ctx) {
             resetInterruptedDevelopment(ctx, interruptedPartialWorkComment(ctx.ticketKey, ctx.branchName, ctx.providerOutage));
         }
     }
+    // Fork: post-processor — mirror integration concerns into the PR body so
+    // reviewers see them without visiting the ticket.
+    try {
+        var concernsDetailed = outputFiles.readOutputFileDetailed('concerns.md');
+        if (concernsDetailed && concernsDetailed.content && concernsDetailed.content.trim()) {
+            responseContent += '\n\n## ⚠️ Concerns — may not work until resolved\n\n' + concernsDetailed.content.trim() + '\n';
+            console.log('Appended outputs/concerns.md to the PR body.');
+        }
+    } catch (e) {
+        console.warn('Could not read outputs/concerns.md for the PR body:', e);
+    }
+
     // gh-1137: the PR body (the leg summary) must state which Dart SDK the leg
     // verified with — `toolchain: dart <v> (CI: <pin>, match: yes|no)` — so
     // format/analyzer claims are checkable against CI. No-op on failure, on
