@@ -45,7 +45,8 @@ Right after reading the input files, run a QUICK (surface-level) go/no-go scan o
 - Essential statements contradict each other.
 
 If there ARE highlights — do NOT implement. Instead:
-1. Post ONE comment on the ticket asking for exactly the missing items. Be specific; propose nothing, assume nothing.
+1. Post ONE comment on the ticket asking for exactly the missing items. Be specific; propose nothing, assume nothing. The comment MUST end with this exact machine marker line (it tells the pipeline this comment is the agent's own question, not a human reply):
+   `<!-- needs-input: ai_questions_asked -->`
 2. Write `outputs/needs-input.md` listing the missing items (same content as the comment).
 3. Make NO code changes and stop. The pipeline labels the ticket `ai_questions_asked` and ends the leg without a PR.
 
